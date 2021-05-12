@@ -5,7 +5,75 @@
 
 template<typename T>
 class TPQueue {
-  // Сюда помещается описание структуры "Очередь с приоритетами"
+ private:
+    T* arr;
+    int size;
+    int begin, end;
+    int count;
+    int stepBack(int index) {
+        int result = --index;
+        if (result < 0)
+            result += size + 1;
+        return result;
+    }
+    int stepForward(int index) {
+        int result = ++index;
+        if (result > size)
+            result -= size + 1;
+        return result;
+    }
+
+ public:
+    TPQueue() :
+        size(100),
+        begin(0), end(0), count(0) {
+        arr = new T[size + 1];
+    }
+    ~TPQueue() {
+        delete[] arr;
+    }
+
+    void push(const T& item) {
+        assert(count < size);
+        if (isEmpty()) {
+            arr[end] = item;
+        } else {
+            int current = stepBack(end);
+            if (arr[current].prior >= item.prior) {
+                arr[end] = item;
+            } else {
+                do {
+                    arr[stepForward(current)] = arr[current];
+                    current = stepBack(current);
+                } while (arr[current].prior < item.prior &&
+                    stepForward(current) != begin);
+                arr[stepForward(current)] = item;
+            }
+        }
+        end = stepForward(end);
+        count++;
+    }
+
+    T pop() {
+        assert(count > 0);
+        T item = arr[begin];
+        count--;
+        begin = stepForward(begin);
+        return item;
+    }
+
+    T get() const {
+        assert(count > 0);
+        return arr[begin];
+    }
+
+    bool isEmpty() const {
+        return count == 0;
+    }
+
+    bool isFull() const {
+        return count == size;
+    }
 };
 
 struct SYM {
